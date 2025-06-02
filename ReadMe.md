@@ -70,37 +70,16 @@ A RESTful API for managing stocks, comments, and user authentication, built w
 
 ---
 
-## **Data Models**
+## **Entity Relationships**
 
-**Stock**
+![relation](assets/relation.png)
 
-| Property    | Type    | Description           |
-| ----------- | ------- | --------------------- |
-| Id          | int     | Primary Key           |
-| Symbol      | string  | Stock symbol          |
-| CompanyName | string  | Name of the company   |
-| Purchase    | decimal | Purchase price        |
-| LastDiv     | decimal | Last dividend amount  |
-| Industry    | string  | Industry name         |
-| MarketCap   | long    | Market capitalization |
-| Comments    | List    | Related comments      |
+- **User ↔ Stock → many-to-many** (via Portfolio) → A user can have many stocks in their portfolio, and a single stock can belong to multiple users' portfolios. This relationship is modeled through the Portfolio join table.
+- **Stock ↔ Comment → one-to-many** → A single Stock can have many Comments. Each Comment is linked to only one Stock (via StockId).
+- **User ↔ Portfolio → one-to-many** → One AppUser can have multiple Portfolio entries.
+- **Stock ↔ Portfolio → one-to-many** → One Stock can appear in multiple Portfolio entries
 
-
-**Comment**
-
-| Property  | Type     | Description     |
-| --------- | -------- | --------------- |
-| Id        | int      | Primary Key     |
-| Title     | string   | Comment title   |
-| Content   | string   | Comment body    |
-| CreatedOn | DateTime | UTC timestamp   |
-| StockId   | int?     | Linked stock ID |
-
-
-**AppUser**
-
-- Inherits from IdentityUser
-- Used for authentication and authorization
+![entity](assets/mtm.png)
 
 ---
 
@@ -122,27 +101,27 @@ A RESTful API for managing stocks, comments, and user authentication, built w
 
 ### **Development Notes & Gotchas**
 
-- **Entity Tracking for Updates**
-    * Why no mapper in UpdateAsync()?
-    Entity Framework Core tracks the original entity in memory. If you replace it with a new instance, EF can't detect changes.
-
-- **Cascade Delete**
-    * Deleting a stock with comments throws an error unless you use:
-    `.OnDelete(DeleteBehavior.Cascade);`
-
-- **Case-insensitive search**
-    * PostgreSQL is case-sensitive by default. used EF.Functions.ILike() for searches like:
-    `.Where(s => EF.Functions.ILike(s.Symbol, $"%{query.Symbol}%"))`
-
-- **JWT in Swagger**
-    * JWT Bearer added to Swagger for testing secured endpoints.
+- **Entity Tracking for Updates** → Why no mapper in UpdateAsync()? Entity Framework Core tracks the original entity in memory. If you replace it with a new instance, EF can't detect changes.
+<br/>
+- **Cascade Delete** → Deleting a stock with comments throws an error unless you use: `.OnDelete(DeleteBehavior.Cascade);`
+<br/>
+- **Case-insensitive search** → PostgreSQL is case-sensitive by default. used EF.Functions.ILike() for searches like:
+`.Where(s => EF.Functions.ILike(s.Symbol, $"%{query.Symbol}%"))`
+<br/>
+- **JWT in Swagger** → JWT Bearer added to Swagger for testing secured endpoints.
     `option.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme { ... });`
-
-- **EF Warning: Non-deterministic seed**
-    * If you use Guid.NewGuid() or DateTime.Now in HasData(), EF complains. Use static values instead.
-
+<br/>
+- **EF Warning: Non-deterministic seed** → If you use Guid.NewGuid() or DateTime.Now in HasData(), EF complains. Use static values instead.
+<br/>
+- **ClaimsPrincipal Extension** → Adds a helper method to extract the username (givenname claim) from the authenticated user's JWT token.
+    `
+        public static string GetUsername(this ClaimsPrincipal user)
+        {
+            return user.Claims.SingleOrDefault(x => x.Type.Equals("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname")).Value;
+        }
+    `
+    Usage example on controller `var username = User.GetUsername();`
+<br/>
 ![Swagger UI](assets/swagger.png)
 
 ![Database Schema](assets/db.png)
-
-
