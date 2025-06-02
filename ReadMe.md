@@ -102,17 +102,19 @@ A RESTful API for managing stocks, comments, and user authentication, built w
 ### **Development Notes & Gotchas**
 
 - **Entity Tracking for Updates** → Why no mapper in UpdateAsync()? Entity Framework Core tracks the original entity in memory. If you replace it with a new instance, EF can't detect changes.
-<br/>
+---
 - **Cascade Delete** → Deleting a stock with comments throws an error unless you use: `.OnDelete(DeleteBehavior.Cascade);`
-<br/>
+
+---
+
 - **Case-insensitive search** → PostgreSQL is case-sensitive by default. used EF.Functions.ILike() for searches like:
 `.Where(s => EF.Functions.ILike(s.Symbol, $"%{query.Symbol}%"))`
-<br/>
+---
 - **JWT in Swagger** → JWT Bearer added to Swagger for testing secured endpoints.
     `option.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme { ... });`
-<br/>
+---
 - **EF Warning: Non-deterministic seed** → If you use Guid.NewGuid() or DateTime.Now in HasData(), EF complains. Use static values instead.
-<br/>
+---
 - **ClaimsPrincipal Extension** → Adds a helper method to extract the username (givenname claim) from the authenticated user's JWT token.
     `
         public static string GetUsername(this ClaimsPrincipal user)
@@ -121,7 +123,7 @@ A RESTful API for managing stocks, comments, and user authentication, built w
         }
     `
     Usage example on controller `var username = User.GetUsername();`
-<br/>
+---
 ![Swagger UI](assets/swagger.png)
 
 ![Database Schema](assets/db.png)
