@@ -72,7 +72,7 @@ A RESTful API for managing stocks, comments, and user authentication, built w
 
 ## **Entity Relationships**
 
-![relation](assets/relation.png)
+![relation](assets/entityrelation.png)
 
 - **User ↔ Stock → many-to-many** (via Portfolio) → A user can have many stocks in their portfolio, and a single stock can belong to multiple users' portfolios. This relationship is modeled through the Portfolio join table.
 - **Stock ↔ Comment → one-to-many** → A single Stock can have many Comments. Each Comment is linked to only one Stock (via StockId).
@@ -124,6 +124,9 @@ A RESTful API for managing stocks, comments, and user authentication, built w
     `
     Usage example on controller `var username = User.GetUsername();`
 ---
+- **Comments and AppUser Relationship** → To show the comment author's username in responses, I load the related `AppUser` explicitly using: `.Include(c => c.Comments).ThenInclude(c => c.AppUser) ` **Why** → I do this instead of adding a List<Comment> navigation property in the AppUser entity to keep the model clean and avoid unnecessary bi-directional relationships. This approach also prevents the N+1 query problem by retrieving all necessary data in a single query. → When creating a comment, I extract the `UserName` from the JWT claims (`User.GetUsername()`), since the user is already authenticated. This way, I avoid querying the `AppUser` entity directly unless needed.
+
+
 ![Swagger UI](assets/swagger.png)
 
 ![Database Schema](assets/db.png)

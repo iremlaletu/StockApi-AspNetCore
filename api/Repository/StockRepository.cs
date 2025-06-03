@@ -40,7 +40,8 @@ namespace api.Repository
 
         public async Task<List<Stock>> GetAllAsync(QueryObject query)
         {
-            var stocks = _context.Stocks.Include(c => c.Comments).AsQueryable();
+            // Use Include to eagerly load related entities (Comments and AppUser) to avoid N+1 query problem
+            var stocks = _context.Stocks.Include(c => c.Comments).ThenInclude(a => a.AppUser).AsQueryable();
 
             if (!string.IsNullOrEmpty(query.CompanyName))
             {
