@@ -127,6 +127,6 @@ A RESTful API for managing stocks, comments, and user authentication, built w
 - **Comments and AppUser Relationship** → To show the comment author's username in responses, I load the related `AppUser` explicitly using: `.Include(c => c.Comments).ThenInclude(c => c.AppUser) ` **Why** → I do this instead of adding a List<Comment> navigation property in the AppUser entity to keep the model clean and avoid unnecessary bi-directional relationships. This approach also prevents the N+1 query problem by retrieving all necessary data in a single query. → When creating a comment, I extract the `UserName` from the JWT claims (`User.GetUsername()`), since the user is already authenticated. This way, I avoid querying the `AppUser` entity directly unless needed.
 
 
-![Swagger UI](assets/swagger.png)
+![Swagger UI](assets/swaggeruı.png)
 
 ![Database Schema](assets/db.png)
