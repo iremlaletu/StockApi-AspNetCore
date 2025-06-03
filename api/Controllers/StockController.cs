@@ -12,6 +12,7 @@ namespace api.Controllers
 {
     [ApiController]
     [Route("api/stock")]
+    [Authorize] // Ensure that all endpoints require authentication
     public class StockController : ControllerBase
     {
         private readonly AppDBContext _context;
@@ -23,7 +24,6 @@ namespace api.Controllers
         }
 
         [HttpGet]
-        [Authorize]
         public async Task<IActionResult> GetAll([FromQuery] QueryObject query)
         {
             if (!ModelState.IsValid)
@@ -37,7 +37,7 @@ namespace api.Controllers
         [HttpGet("{id:int}")]
         public async Task<IActionResult> GetById([FromRoute] int id)
         {
-           if (!ModelState.IsValid)
+            if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
             var stock = await _stockRepo.GetByIdAsync(id);
@@ -68,7 +68,7 @@ namespace api.Controllers
         public async Task<IActionResult> Update([FromRoute] int id, [FromBody] UpdateStockRequestDto updateDto)
 
         {
-           if (!ModelState.IsValid)
+            if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
             var stockModel = await _stockRepo.UpdateAsync(id, updateDto);

@@ -19,6 +19,7 @@ namespace api.Repository
 
         public async Task<Stock> CreateAsync(Stock stockModel)
         {
+            stockModel.Symbol = stockModel.Symbol.ToUpper();
             await _context.Stocks.AddAsync(stockModel);
             await _context.SaveChangesAsync();
             return stockModel;
@@ -71,6 +72,13 @@ namespace api.Repository
             return await _context.Stocks.Include(c => c.Comments).FirstOrDefaultAsync(i => i.Id == id);
         }
 
+        public async Task<Stock?> GetBySymbolAsync(string symbol)
+        {
+            return await _context.Stocks
+                .FirstOrDefaultAsync(s => s.Symbol == symbol.ToUpper()); // Use ToLower() for case-insensitive search, I save symbol in uppercase in the database - PostgreSQL
+                // .Include(c => c.Comments)
+        }
+
         public Task<bool> StockExists(int id)
         {
             return _context.Stocks.AnyAsync(x => x.Id == id);
@@ -84,7 +92,7 @@ namespace api.Repository
                 return null;
             }
 
-            existingStock.Symbol = stockDto.Symbol;
+            existingStock.Symbol = stockDto.Symbol.ToUpper();
             existingStock.CompanyName = stockDto.CompanyName;
             existingStock.Purchase = stockDto.Purchase;
             existingStock.LastDiv = stockDto.LastDiv;

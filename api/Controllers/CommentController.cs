@@ -3,6 +3,7 @@
 using api.Dtos.Comment;
 using api.Interfaces;
 using api.Mappers;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
@@ -10,6 +11,7 @@ namespace api.Controllers
 {
     [Route("api/comment")]
     [ApiController]
+    [Authorize] // Ensure that all endpoints require authentication
     public class CommentController : ControllerBase
     {
         private readonly ICommentRepository _commentRepo;
@@ -81,7 +83,7 @@ namespace api.Controllers
         public async Task<IActionResult> Delete([FromRoute] int id)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
-            
+
             var commentModel = await _commentRepo.DeleteAsync(id);
             if (commentModel == null)
             {
